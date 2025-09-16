@@ -15,15 +15,24 @@ function registerTopicFooterButtons(api, container, siteSettings) {
     label() {
       return "private_replies.button.private_replies.button";
     },
-    action() {
-      // Get topic owner's email or use a default
+    async action() {
       const topicOwner = this.get("topic.details.created_by");
-      const email = topicOwner?.email || "someone@example.com";
-      const subject = `Re: ${this.get("topic.title")}`;
       
-      // Open Gmail with mailto link
-      const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
-      window.open(mailtoLink, '_blank');
+      try {
+        // Fetch user details including email via API
+        const userDetails = await ajax(`/u/${topicOwner.username}.json`);
+        const email = userDetails.user?.email || "someone@example.com";
+        
+        const subject = `Re: ${this.get("topic.title")}`;
+        const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
+        window.open(mailtoLink, '_blank');
+      } catch (error) {
+        popupAjaxError(error);
+        // Fallback to default email if API call fails
+        const subject = `Re: ${this.get("topic.title")}`;
+        const mailtoLink = `mailto:someone@example.com?subject=${encodeURIComponent(subject)}`;
+        window.open(mailtoLink, '_blank');
+      }
     },
     dropdown() {
       return this.site.mobileView;
@@ -44,6 +53,23 @@ export default {
       return;
     }
 
-    withPluginApi("0.8.28", api => registerTopicFooterButtons(api, container, siteSettings));
+    withPluginApi("0.8.28", api => {
+      registerTopicFooterButtons(api, container, siteSettings);
+      api.onPageChange(() => {
+        // Hide the main Reply button at the bottom of topics
+        const replyButton = document.querySelector('.timeline-container .topic-timeline .reply-to-post');
+        if (replyButton) {
+          replyButton.style.display = 'none';
+        }
+        
+        // Hide Reply buttons in the topic controls
+        const topicReplyButtons = document.querySelectorAll('.topic-footer-main-buttons .btn-primary');
+        topicReplyButtons.forEach(button => {
+          if (button.textContent.trim().includes('Reply')) {
+            button.style.display = 'none';
+          }
+        });
+      });
+    });
   }
 };
