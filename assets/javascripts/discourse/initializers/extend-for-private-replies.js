@@ -6,7 +6,7 @@ function registerTopicFooterButtons(api, container, siteSettings) {
   api.registerTopicFooterButton({
     id: "privatereplies",
     icon() {
-      return "envelope";
+      return "reply";
     },
     priority: 250,
     title() {
@@ -37,7 +37,7 @@ function registerTopicFooterButtons(api, container, siteSettings) {
     dropdown() {
       return this.site.mobileView;
     },
-    classNames: ["private-replies"],
+    classNames: ["btn-primary"],
     displayed() {
       // Show email button for all logged-in users
       return this.currentUser;

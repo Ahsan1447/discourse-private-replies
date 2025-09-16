@@ -16,5 +16,5 @@ en:
           button: "Public Replies"
           help: "Set all replies in this topic visible to everyone"
         private_replies:
-          button: "Private Replies"
+          button: "Reply"
           help: "Make replies in this topic visible to topic owner only"
